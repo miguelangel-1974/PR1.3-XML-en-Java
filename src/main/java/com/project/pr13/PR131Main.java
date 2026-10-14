@@ -1,14 +1,19 @@
 package com.project.pr13;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Classe principal que crea un document XML amb informació de llibres i el guarda en un fitxer.
@@ -94,7 +99,71 @@ public class PR131Main {
      */
     static Document construirDocument() {
         // *************** CODI PRÀCTICA **********************/
-       return null; // Substitueix pel teu
+        try {
+            // Crea una factoria de constructors de documents
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        
+            // Crea un constructor de documents
+            DocumentBuilder db = dbf.newDocumentBuilder();
+        
+            // Crea un nou document XML
+            Document doc = db.newDocument();
+
+            // Crea l'element root del document XML
+            Element elmRoot = doc.createElement("biblioteca");
+            // Afegeix l'element root al document XML
+            doc.appendChild(elmRoot);
+
+            // Crea l'element <llibre>, que sera fill de <biblioteca>
+            Element elmLlibre = doc.createElement("llibre");
+            elmRoot.appendChild(elmLlibre);
+            
+            // Crea un element i un node de text per a cada camp
+            Element elmTitol = doc.createElement("titol");
+            Text nodeTextTitol = doc.createTextNode("El viatge dels venturons");
+            Element elmAutor = doc.createElement("autor");
+            Text nodeTextAutor = doc.createTextNode("Joan Pla");
+            Element elmAnyPublicacio = doc.createElement("anyPublicacio");
+            Text nodeTextAnyPublicacio = doc.createTextNode("1998");
+            Element elmEditorial = doc.createElement("editorial");
+            Text nodeTextEditorial = doc.createTextNode("Edicions Mar");
+            Element elmGenere = doc.createElement("genere");
+            Text nodeTextGenere = doc.createTextNode("Aventura");
+            Element elmPagines = doc.createElement("pagines");
+            Text nodeTextPagines = doc.createTextNode("320");
+            Element elmDisponible = doc.createElement("disponible");
+            Text nodeTextDisponible = doc.createTextNode("true");
+            
+            // Afegeix el node de text a cada element
+            elmTitol.appendChild(nodeTextTitol);
+            elmAutor.appendChild(nodeTextAutor);
+            elmAnyPublicacio.appendChild(nodeTextAnyPublicacio);
+            elmEditorial.appendChild(nodeTextEditorial);
+            elmGenere.appendChild(nodeTextGenere);
+            elmPagines.appendChild(nodeTextPagines);
+            elmDisponible.appendChild(nodeTextDisponible);
+            
+            // Afegeix els elements a <llibre> (no a l'arrel)
+            elmLlibre.appendChild(elmTitol);
+            elmLlibre.appendChild(elmAutor);
+            elmLlibre.appendChild(elmAnyPublicacio);
+            elmLlibre.appendChild(elmEditorial);
+            elmLlibre.appendChild(elmGenere);
+            elmLlibre.appendChild(elmPagines);
+            elmLlibre.appendChild(elmDisponible);
+
+            // Crea un atribut "id"
+            Attr attrId = doc.createAttribute("id");
+            // Estableix el valor de l'atribut "id"
+            attrId.setValue("001");
+            // Afegeix l'atribut "id" a l'element "to"
+            elmLlibre.setAttributeNode(attrId);
+
+            return doc;
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+       return null;
     }
 
     /**
@@ -105,5 +174,33 @@ public class PR131Main {
      */
     private static void guardarDocument(Document doc, File fitxerSortida) {
         // *************** CODI PRÀCTICA **********************/
+        try {
+            // Crea una factoria de transformadors XSLT
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+            // Crea un transformador XSLT
+            Transformer transformer = transformerFactory.newTransformer();
+
+            // Estableix la propietat OMIT_XML_DECLARATION a "no" per no ometre la declaració XML
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+
+            // Estableix la propietat INDENT a "yes" per indentar el document XML resultant
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            // Opcional: nombre d'espais per nivell d'indentació
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+            // Crea una instància de DOMSource a partir del document XML
+            DOMSource source = new DOMSource(doc);
+
+            // Crea una instància de StreamResult a partir del fitxer de sortida
+            StreamResult result = new StreamResult(fitxerSortida);
+
+            // Transforma el document XML i escriu el resultat al fitxer
+            transformer.transform(source, result);
+        } catch (TransformerException e) {
+            // Error en escriure el document (diapositiva 17: capturar l'excepció concreta)
+            System.err.println("No es pot escriure " + fitxerSortida + ": " + e.getMessage());
+        }
     }
 }
